@@ -1,4 +1,4 @@
-# Tarea de Metaheurísticas - Modelo de Optimización para Centros de Vacunación
+# Tarea de Metaheurísticas - Modelo de Optimización para Centros de Vacunación (Diego Pastrián y Lucas Gonzalez
 
 ## Descripción
 Este proyecto aborda el problema de optimización para determinar la ubicación de centros de vacunación en la región Brisketiana. El modelo se basa en un problema de cobertura, donde el objetivo es minimizar los costos de construcción de los centros de vacunación, asegurando que todas las comunas estén cubiertas.
