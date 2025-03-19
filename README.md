@@ -12,9 +12,3 @@ Se utilizan diferentes técnicas de búsqueda, como:
 - Minimización del costo total de los centros de vacunación.
 - Asegura que todas las comunas estén cubiertas por al menos un centro.
 - Implementación de Forward Checking para optimizar la búsqueda.
-
-## Requisitos
-Asegúrate de tener instalados los siguientes paquetes para poder ejecutar el código:
-
-```bash
-pip install matplotlib
