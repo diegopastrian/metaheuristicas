@@ -4,7 +4,7 @@ import matplotlib.pyplot as plt
 nodos_visitados_forward = 0
 
 costos = [60, 30, 60, 70, 130, 60, 70, 60, 80, 70, 50, 90, 30, 30, 100]
-
+ #        1   2   3    4   5   6    7   8   9  10  11  12  13  14   15
 cobertura = [
     [1, 1, 1, 1, 0, 0, 0, 0, 0, 0, 0, 0, 1, 0, 0],
     [1, 1, 0, 1, 0, 0, 0, 0, 0, 0, 0, 1, 0, 0, 1], 
@@ -24,6 +24,20 @@ cobertura = [
 ]
 
 comunas = list(range(1, 16))
+
+def calcular_heuristica():
+    """
+    Calcula la heurística para la selección de la siguiente comuna
+    - Se selecciona primero la comuna con menos vecinos.
+    - Si hay empate, se selecciona la comuna con el menor costo.
+    """
+    # Calculamos el número de vecinos de cada comuna
+    cobertura_count = {comuna: sum(cobertura[comuna-1]) for comuna in comunas}
+    
+    # Ordenamos las comunas primero por la cantidad de vecinos (de menos a más), luego por costo (menor costo primero)
+    orden_heuristico = sorted(comunas, key=lambda comuna: (-cobertura_count[comuna], costos[comuna-1]))
+    
+    return orden_heuristico
 
 def es_factible(solucion):
     """
@@ -57,7 +71,7 @@ def forward_check(solucion):
                 return False
     return True
 
-def busqueda_forward_checking(index, solucion_actual, costo_actual, mejor_sol, mejor_costo, inicio, evolucion):
+def busqueda_forward_checking(index, solucion_actual, costo_actual, mejor_sol, mejor_costo, inicio, evolucion, orden):
     """
     Aplica forward checking en cada nivel:
     - Si no se puede cubrir las comunas restantes con lo no asignado, se poda.
@@ -79,62 +93,77 @@ def busqueda_forward_checking(index, solucion_actual, costo_actual, mejor_sol, m
             evolucion.append((time.time() - inicio, costo_actual))
         return
 
-    comuna = comunas[index]
+    comuna = orden[index]
 
-    # Opción 1: no construir centro
+    # no construir centro
     solucion_actual[comuna] = 0
     nodos_visitados_forward += 1
     busqueda_forward_checking(index + 1, solucion_actual, costo_actual,
-                              mejor_sol, mejor_costo, inicio, evolucion)
+                              mejor_sol, mejor_costo, inicio, evolucion, orden)
 
-    # Opción 2: construir centro
+    # construir centro
     solucion_actual[comuna] = 1
     nuevo_costo = costo_actual + costos[comuna - 1]  # Ajuste en el índice
     nodos_visitados_forward += 1
     busqueda_forward_checking(index + 1, solucion_actual, nuevo_costo,
-                              mejor_sol, mejor_costo, inicio, evolucion)
+                              mejor_sol, mejor_costo, inicio, evolucion, orden)
 
     # Backtrack
     solucion_actual.pop(comuna)
 
-# ---------------------------------------------------------
-# Función para graficar la evolución de cada algoritmo
-# ---------------------------------------------------------
-def plot_evolution(evolution, label):
-    """
-    Dibuja la evolución del costo en función del tiempo
-    para la técnica con nombre 'label'.
-    """
-    evolution.sort(key=lambda x: x[0])
-    tiempos = [t for (t, _) in evolution]
-    costos_vals = [cost for (_, cost) in evolution]
-    plt.plot(tiempos, costos_vals, label=label)
-
-# ---------------------------------------------------------
-# Función principal
-# ---------------------------------------------------------
 def main():
     global nodos_visitados_forward
+    
+    # 1. Ejecución sin heurística
+    nodos_visitados_forward = 0
     mejor_sol_forward = {}
     mejor_costo_forward = [float('inf')]
-    evolucion_forward = []
+    evolucion_forward_sin_heuristica = []
     inicio3 = time.time()
     busqueda_forward_checking(0, {}, 0, mejor_sol_forward, mejor_costo_forward,
-                              inicio3, evolucion_forward)
-    tiempo_forward = time.time() - inicio3
-    print(f"Solución con forward checking: Costo = {mejor_costo_forward[0]}, "
-          f"Tiempo = {round(tiempo_forward * 1000, 2)} milisegundos")
+                              inicio3, evolucion_forward_sin_heuristica, comunas)  # Ejecuta con el orden natural
+    tiempo_forward_sin_heuristica = time.time() - inicio3
+    print(f"Solución con forward checking (sin heurística): Costo = {mejor_costo_forward[0]}, "
+          f"Tiempo = {round(tiempo_forward_sin_heuristica * 1000, 2)} milisegundos")
     print("Centros construidos en comunas:",
           [i for i in mejor_sol_forward if mejor_sol_forward[i] == 1])
-    print("Evolución (tiempo, costo):", evolucion_forward)
-    print(f"Nodos visitados: {nodos_visitados_forward}")
+    print(f"Nodos visitados (sin heurística): {nodos_visitados_forward}")
     
-    # Graficar la evolución de todas las variantes
-    plt.figure(figsize=(12, 8))
-    plot_evolution(evolucion_forward, 'Forward Checking')
-    plt.xlabel('Tiempo (segundos)')
-    plt.ylabel('Costo Óptimo')
-    plt.title('Evolución del Costo Óptimo vs Tiempo (Coberturas Corregidas)')
+    # 2. Ejecución con heurística
+    nodos_visitados_forward = 0
+    orden_heuristico = calcular_heuristica()
+    print(f" El orden heuristico: {orden_heuristico}")
+    mejor_sol_forward = {}
+    mejor_costo_forward = [float('inf')]
+    evolucion_forward_con_heuristica = []
+    inicio3 = time.time()
+    busqueda_forward_checking(0, {}, 0, mejor_sol_forward, mejor_costo_forward,
+                              inicio3, evolucion_forward_con_heuristica, orden_heuristico)  # Ejecuta con la heurística
+    tiempo_forward_con_heuristica = time.time() - inicio3
+    print(f"Solución con forward checking (con heurística): Costo = {mejor_costo_forward[0]}, "
+          f"Tiempo = {round(tiempo_forward_con_heuristica * 1000, 2)} milisegundos")
+    print("Centros construidos en comunas:",
+          [i for i in mejor_sol_forward if mejor_sol_forward[i] == 1])
+    print(f"Nodos visitados (con heurística): {nodos_visitados_forward}")
+
+    # Graficar costo vs tiempo
+    plt.figure(figsize=(10, 6))
+    
+    # Extraer valores de evolución para cada método
+    tiempos_sin_heuristica = [t for (t, _) in evolucion_forward_sin_heuristica]
+    costos_sin_heuristica = [c for (_, c) in evolucion_forward_sin_heuristica]
+
+    tiempos_con_heuristica = [t for (t, _) in evolucion_forward_con_heuristica]
+    costos_con_heuristica = [c for (_, c) in evolucion_forward_con_heuristica]
+
+    # Graficar ambas curvas
+    plt.plot(tiempos_sin_heuristica, costos_sin_heuristica, label="Sin Heurística", marker='o')
+    plt.plot(tiempos_con_heuristica, costos_con_heuristica, label="Con Heurística", marker='s')
+
+    # Etiquetas
+    plt.xlabel("Tiempo (segundos)")
+    plt.ylabel("Costo Total")
+    plt.title("Evolución del Costo vs Tiempo para Forward Checking")
     plt.legend()
     plt.grid(True)
     plt.show()
