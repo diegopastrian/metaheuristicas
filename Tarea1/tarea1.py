@@ -1,14 +1,10 @@
 import time
 import matplotlib.pyplot as plt
 
-# ---------------------------------------------------------
-# Costos (tomados del enunciado)
-# ---------------------------------------------------------
+nodos_visitados_forward = 0
+
 costos = [60, 30, 60, 70, 130, 60, 70, 60, 80, 70, 50, 90, 30, 30, 100]
 
-# ---------------------------------------------------------
-# Conjuntos de cobertura (corregidos según la figura)
-# ---------------------------------------------------------
 cobertura = [
     [1, 1, 1, 1, 0, 0, 0, 0, 0, 0, 0, 0, 1, 0, 0],
     [1, 1, 0, 1, 0, 0, 0, 0, 0, 0, 0, 1, 0, 0, 1], 
@@ -27,16 +23,11 @@ cobertura = [
     [0, 1, 0, 0, 0, 0, 1, 0, 0, 0, 0, 1, 0, 1, 1]  
 ]
 
-# Lista de comunas (1 a 15)
 comunas = list(range(1, 16))
 
-# ---------------------------------------------------------
-# Función para verificar la factibilidad (cubre todas las comunas?)
-# ---------------------------------------------------------
 def es_factible(solucion):
     """
-    Verifica que cada comuna (1..15) esté cubierta por al menos un centro.
-    Si alguna comuna j no está cubierta, retorna False.
+    Verifica que se satisface la demanda de cada comuna
     """
     for j in comunas:
         cubierta = False
@@ -49,13 +40,9 @@ def es_factible(solucion):
             return False
     return True
 
-# ---------------------------------------------------------
-# Forward Checking
-# ---------------------------------------------------------
 def forward_check(solucion):
     """
-    Verifica, para cada comuna j no cubierta todavía,
-    si existe al menos una comuna no asignada que pueda cubrir j.
+    Observa si cada comuna j podrá ser cubierta a futuro por comuna i
     """
     unassigned = [i for i in comunas if i not in solucion]
     for j in comunas:
@@ -70,14 +57,13 @@ def forward_check(solucion):
                 return False
     return True
 
-# ---------------------------------------------------------
-# Función principal con Forward Checking
-# ---------------------------------------------------------
 def busqueda_forward_checking(index, solucion_actual, costo_actual, mejor_sol, mejor_costo, inicio, evolucion):
     """
     Aplica forward checking en cada nivel:
     - Si no se puede cubrir las comunas restantes con lo no asignado, se poda.
     """
+    global nodos_visitados_forward
+
     if costo_actual >= mejor_costo[0]:
         return
 
@@ -97,12 +83,14 @@ def busqueda_forward_checking(index, solucion_actual, costo_actual, mejor_sol, m
 
     # Opción 1: no construir centro
     solucion_actual[comuna] = 0
+    nodos_visitados_forward += 1
     busqueda_forward_checking(index + 1, solucion_actual, costo_actual,
                               mejor_sol, mejor_costo, inicio, evolucion)
 
     # Opción 2: construir centro
     solucion_actual[comuna] = 1
     nuevo_costo = costo_actual + costos[comuna - 1]  # Ajuste en el índice
+    nodos_visitados_forward += 1
     busqueda_forward_checking(index + 1, solucion_actual, nuevo_costo,
                               mejor_sol, mejor_costo, inicio, evolucion)
 
@@ -126,6 +114,7 @@ def plot_evolution(evolution, label):
 # Función principal
 # ---------------------------------------------------------
 def main():
+    global nodos_visitados_forward
     mejor_sol_forward = {}
     mejor_costo_forward = [float('inf')]
     evolucion_forward = []
@@ -134,10 +123,11 @@ def main():
                               inicio3, evolucion_forward)
     tiempo_forward = time.time() - inicio3
     print(f"Solución con forward checking: Costo = {mejor_costo_forward[0]}, "
-          f"Tiempo = {tiempo_forward:.4f} segundos")
+          f"Tiempo = {round(tiempo_forward * 1000, 2)} milisegundos")
     print("Centros construidos en comunas:",
           [i for i in mejor_sol_forward if mejor_sol_forward[i] == 1])
     print("Evolución (tiempo, costo):", evolucion_forward)
+    print(f"Nodos visitados: {nodos_visitados_forward}")
     
     # Graficar la evolución de todas las variantes
     plt.figure(figsize=(12, 8))
