@@ -123,15 +123,23 @@ def main():
     busqueda_forward_checking(0, {}, 0, mejor_sol_forward, mejor_costo_forward,
                               inicio3, evolucion_forward_sin_heuristica, comunas)  # Ejecuta con el orden natural
     tiempo_forward_sin_heuristica = time.time() - inicio3
-    print(f"Solución con forward checking (sin heurística): Costo = {mejor_costo_forward[0]}, "
-          f"Tiempo = {round(tiempo_forward_sin_heuristica * 1000, 2)} milisegundos")
-    print("Centros construidos en comunas:",
-          [i for i in mejor_sol_forward if mejor_sol_forward[i] == 1])
-    print(f"Nodos visitados (sin heurística): {nodos_visitados_forward}")
+    print("\n===============================")
+    print("Ejecución sin Heurística")
+    print("===============================")
+    print(f" - Costo Óptimo: {mejor_costo_forward[0]}")
+    print(f" - Tiempo: {round(tiempo_forward_sin_heuristica * 1000, 2)} milisegundos")
+    print(f" - Centros construidos en comunas: {', '.join(map(str, [i for i in mejor_sol_forward if mejor_sol_forward[i] == 1]))}")
+    print(f" - Nodos visitados: {nodos_visitados_forward}")
+    print("===============================\n")
+
     
     # 2. Ejecución con heurística
     nodos_visitados_forward = 0
     orden_heuristico = calcular_heuristica()
+    print("\n===============================")
+    print("Ejecución con Heurística")
+    print("===============================")
+    print(f" - Orden Heurístico: {', '.join(map(str, orden_heuristico))}")
     print(f" El orden heuristico: {orden_heuristico}")
     mejor_sol_forward = {}
     mejor_costo_forward = [float('inf')]
@@ -140,11 +148,11 @@ def main():
     busqueda_forward_checking(0, {}, 0, mejor_sol_forward, mejor_costo_forward,
                               inicio3, evolucion_forward_con_heuristica, orden_heuristico)  # Ejecuta con la heurística
     tiempo_forward_con_heuristica = time.time() - inicio3
-    print(f"Solución con forward checking (con heurística): Costo = {mejor_costo_forward[0]}, "
-          f"Tiempo = {round(tiempo_forward_con_heuristica * 1000, 2)} milisegundos")
-    print("Centros construidos en comunas:",
-          [i for i in mejor_sol_forward if mejor_sol_forward[i] == 1])
-    print(f"Nodos visitados (con heurística): {nodos_visitados_forward}")
+    print(f" - Costo Óptimo: {mejor_costo_forward[0]}")
+    print(f" - Tiempo: {round(tiempo_forward_con_heuristica * 1000, 2)} milisegundos")
+    print(f" - Centros construidos en comunas: {', '.join(map(str, [i for i in mejor_sol_forward if mejor_sol_forward[i] == 1]))}")
+    print(f" - Nodos visitados: {nodos_visitados_forward}")
+    print("===============================")
 
     # Graficar costo vs tiempo
     plt.figure(figsize=(10, 6))
