@@ -114,6 +114,7 @@ def busqueda_forward_checking(index, solucion_actual, costo_actual, mejor_sol, m
 def main():
     global nodos_visitados_forward
     #hola
+    #permatrago
     # 1. Ejecución sin heurística
     nodos_visitados_forward = 0
     mejor_sol_forward = {}
