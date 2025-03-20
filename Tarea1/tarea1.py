@@ -26,17 +26,8 @@ cobertura = [
 comunas = list(range(1, 16))
 
 def calcular_heuristica():
-    """
-    Calcula la heurística para la selección de la siguiente comuna
-    - Se selecciona primero la comuna con menos vecinos.
-    - Si hay empate, se selecciona la comuna con el menor costo.
-    """
-    # Calculamos el número de vecinos de cada comuna
     cobertura_count = {comuna: sum(cobertura[comuna-1]) for comuna in comunas}
-    
-    # Ordenamos las comunas primero por la cantidad de vecinos (de menos a más), luego por costo (menor costo primero)
     orden_heuristico = sorted(comunas, key=lambda comuna: (-cobertura_count[comuna], costos[comuna-1]))
-    
     return orden_heuristico
 
 def es_factible(solucion):
@@ -113,7 +104,6 @@ def busqueda_forward_checking(index, solucion_actual, costo_actual, mejor_sol, m
 
 def main():
     global nodos_visitados_forward
-    #hola lucowsky
     # 1. Ejecución sin heurística
     nodos_visitados_forward = 0
     mejor_sol_forward = {}
@@ -132,7 +122,9 @@ def main():
     print(f" - Nodos visitados: {nodos_visitados_forward}")
     print("===============================\n")
 
-    
+    # Agregar el punto final en la evolución (sin heurística)
+    evolucion_forward_sin_heuristica.append(((time.time() - inicio3) , mejor_costo_forward[0]))
+
     # 2. Ejecución con heurística
     nodos_visitados_forward = 0
     orden_heuristico = calcular_heuristica()
@@ -153,6 +145,9 @@ def main():
     print(f" - Centros construidos en comunas: {', '.join(map(str, [i for i in mejor_sol_forward if mejor_sol_forward[i] == 1]))}")
     print(f" - Nodos visitados: {nodos_visitados_forward}")
     print("===============================")
+
+    # Agregar el punto final en la evolución (con heurística)
+    evolucion_forward_con_heuristica.append(((time.time() - inicio3) , mejor_costo_forward[0]))
 
     # Graficar costo vs tiempo
     plt.figure(figsize=(10, 6))
